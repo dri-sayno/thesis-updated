@@ -1,8 +1,7 @@
-#import packages
 import os
 import io
 from PIL import Image 
-# import pytesseract
+import pytesseract
 # from wand.image import Image as wi
 from os import listdir, mkdir
 from os.path import dirname, exists, isdir, realpath, isfile, join
@@ -10,8 +9,8 @@ from django.contrib import messages
 from fpdf import FPDF
 
 # Path for scanned files
-# SCANNED_FILES_DIR = "/home/pi/Documents/"
-SCANNED_FILES_DIR = "/Users/Aids/Desktop/Thesis Git 020918/thesis_app/document/"
+SCANNED_FILES_DIR = "/home/pi/Documents/"
+# SCANNED_FILES_DIR = "/Users/Aids/Desktop/Thesis Git 020918/thesis_app/document/"
 
 class PDF(FPDF):
     def footer(self):

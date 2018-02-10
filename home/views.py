@@ -8,13 +8,13 @@ from os.path import dirname, exists, isdir, realpath, isfile, join
 
 import glob
 import pdb
-#from .hcr import HCR
+from .hcr import HCR
 import os
 
-from .plagscan import login_user, plagscan_upload
-#from .forms import DocumentForm
-#from .picam import capture_images
-#from .ocr import read_typewritten_img, read_handwritten_from_dir
+# from .plagscan import login_user, plagscan_upload
+from .forms import DocumentForm
+from .picam import capture_images
+from .ocr import read_typewritten_img, read_handwritten_from_dir
 from .utils import SCANNED_FILES_DIR, create_dir, format_list, generate_pdf
 from time import sleep
 
@@ -154,33 +154,33 @@ def user_upload_scan_flatbed(request):
             if 'scan' in request.POST:
                 print('scan')
                 # TODO: capture 1 image
-                # capture_images((SCANNED_FILES_DIR + doc_title + '/'), 1, 'flatbed')
+                capture_images((SCANNED_FILES_DIR + doc_title + '/'), 1, 'flatbed')
                 pdb.set_trace()
                 print('Finish Capturing images')
                 return render(request, 'user_upload_scan_flatbed.html')
             elif 'submit' in request.POST:
-                # if doc_type == 'T_Written':
-                #     for f in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
-                #         unformatted_list = read_typewritten_img(f)
-                #         recognized_text.append(format_list(unformatted_list))
-                # else:
-                #     recognized_text = read_handwritten_from_dir(
-                #         SCANNED_FILES_DIR + doc_title)
+                if doc_type == 'T_Written':
+                    for f in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
+                        unformatted_list = read_typewritten_img(f)
+                        recognized_text.append(format_list(unformatted_list))
+                else:
+                    recognized_text = read_handwritten_from_dir(
+                        SCANNED_FILES_DIR + doc_title)
 
-                # for file in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
-                #     if doc_type == 'T_Written':
-                #         unformatted_list = read_typewritten_img(file)
-                #         recognized_text.append(format_list(unformatted_list))
-                #     else:
-                #         pass
-                # unformatted_list = read_handwritten_img(file)
-                # recognized_text.append(
-                # format_list(unformatted_list))
-                # generate_pdf(recognized_text, doc_title)
-                # print("PDF generated")
-                # content = dirname(realpath(__file__)) + "/Documents/" + \
-                #    doc_title + "/" + doc_title + ".pdf"
-                content = 'C:\\Users\\Aids\\Desktop\\Thesis Git 020918\\thesis_app\\document\\sample_3\\tapofwar.pdf';
+                for file in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
+                    if doc_type == 'T_Written':
+                        unformatted_list = read_typewritten_img(file)
+                        recognized_text.append(format_list(unformatted_list))
+                    else:
+                        pass
+                unformatted_list = read_handwritten_img(file)
+                recognized_text.append(
+                format_list(unformatted_list))
+                generate_pdf(recognized_text, doc_title)
+                print("PDF generated")
+                content = dirname(realpath(__file__)) + "/Documents/" + \
+                   doc_title + "/" + doc_title + ".pdf"
+                # content = 'C:\\Users\\Aids\\Desktop\\Thesis Git 020918\\thesis_app\\document\\sample_3\\tapofwar.pdf';
                 plagscan = PlagScan()
                 docID = plagscan.save_from_scanner(content)
                 return redirect("/home/document/?id=" + str(docID))
