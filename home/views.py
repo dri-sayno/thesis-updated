@@ -12,7 +12,7 @@ from .hcr import HCR
 import os
 
 # from .plagscan import login_user, plagscan_upload
-from .forms import DocumentForm
+# from .forms import DocumentForm
 from .picam import capture_images
 from .ocr import read_typewritten_img, read_handwritten_from_dir
 from .utils import SCANNED_FILES_DIR, create_dir, format_list, generate_pdf
@@ -154,11 +154,13 @@ def user_upload_scan_flatbed(request):
             if 'scan' in request.POST:
                 print('scan')
                 # TODO: capture 1 image
-                capture_images((SCANNED_FILES_DIR + doc_title + '/'), 1, 'flatbed')
-                pdb.set_trace()
+                capture_images(
+                    (SCANNED_FILES_DIR + doc_title + '/'), 1, 'flatbed')
+                # pdb.set_trace()
                 print('Finish Capturing images')
                 return render(request, 'user_upload_scan_flatbed.html')
             elif 'submit' in request.POST:
+                recognized_text = []
                 if doc_type == 'T_Written':
                     for f in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
                         unformatted_list = read_typewritten_img(f)
@@ -175,12 +177,13 @@ def user_upload_scan_flatbed(request):
                         pass
                 unformatted_list = read_handwritten_img(file)
                 recognized_text.append(
-                format_list(unformatted_list))
+                    format_list(unformatted_list))
                 generate_pdf(recognized_text, doc_title)
                 print("PDF generated")
                 content = dirname(realpath(__file__)) + "/Documents/" + \
-                   doc_title + "/" + doc_title + ".pdf"
+                    doc_title + "/" + doc_title + ".pdf"
                 # content = 'C:\\Users\\Aids\\Desktop\\Thesis Git 020918\\thesis_app\\document\\sample_3\\tapofwar.pdf';
+
                 plagscan = PlagScan()
                 docID = plagscan.save_from_scanner(content)
                 return redirect("/home/document/?id=" + str(docID))
@@ -202,7 +205,7 @@ def user_upload_scan_feeder(request):
         if request.method == 'GET':
             print('GET')
             # capture_images(SCANNED_FILES_DIR + doc_title + '/', doc_pages, 'feeder')
-            pdb.set_trace()
+            # pdb.set_trace()
             print('Finish Capturing images')
             messages.success(request, 'null')
             return render(request, 'user_upload_scan_feeder.html')
@@ -239,6 +242,7 @@ def user_upload_scan_feeder(request):
                 print("PDF generated")
                 content = dirname(realpath(__file__)) + "/Documents/" + \
                     doc_title + "/" + doc_title + ".pdf"
+
                 if plagscan_upload(content):
                     messages.success(request, 'Files upload completed!')
                     return render(request, 'doc_result.html')
@@ -248,6 +252,17 @@ def user_upload_scan_feeder(request):
                     return render(request, 'user_upload_scan_feeder.html')
     else:
         return render(request, 'error_page.html')
+
+
+# Uploads generated pdf files for
+# Flatbed and Feeder
+def upload_generated_file(filepath):
+    doc = Document(document=filepath)
+    doc.save()
+
+    plagscan = PlagScan()
+    docID = plagscan.document_submit(doc.document, doc)
+    return redirect("/home/document/?id=" + str(docID))
 
 
 def user_upload_direct(request):
@@ -295,7 +310,6 @@ def user_upload_direct(request):
             print('INVALID FORM')
             return render(request, 'user_upload_direct.html')
 
-            form = DocumentForm()
         # return render(request, 'user_upload_direct.html', {'form': form})
     else:
         return render(request, 'error_page.html')
