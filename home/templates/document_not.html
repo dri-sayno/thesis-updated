@@ -9,7 +9,7 @@
                         <p>Title:{{ document.document }}</p>
                         <p>This document is not check/analyze its plagiarism.</p>
                         <center>
-                            <a href="/home/document_check?id={{document.docID}}" class="btn btn-outline-primary btn-inst"><p>CHECK IT</p></a>
+                            <a href="/home/document_check?id={{document.docID}}" class="btn btn-outline-primary btn-inst" id="check"><p>CHECK IT</p></a>
                         </center>
                     </div>
                 </div>
@@ -17,4 +17,27 @@
             
         </div>
     </div>
+
+    <div id="processModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <center>Processing... Please wait</center>
+                </div>
+            </div>
+        </div> 
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#check').click(function() {
+                $("#processModal").modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+            })
+        });
+    </script>
+
+
 {% endblock %}

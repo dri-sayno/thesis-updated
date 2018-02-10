@@ -6,9 +6,8 @@
             <div class="home-option">
                 <div class="col-xs-12">
                     <div class="card card-outline-primary">
-                        <input type="hidden" id="doc_id" value="{{ document.docID}}">
                         <p>Title: {{ document.document }}</p>
-                        <p>This document is in queue to be converted. <br>Refresh the page after a while.</p>
+                        <p>This document is in queue to be converted. <br>Please wait ...</p>
                     </div>
                 </div>
             </div>
@@ -20,7 +19,5 @@
             var url = window.location.href;
             location.href = url;
         }, 3000);
-
-
     </script>
 {% endblock %}

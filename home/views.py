@@ -329,7 +329,6 @@ def document(request):
         elif status == "checking":
             return render(request, 'document_checking.html', context)
         elif status == "converting":
-            print 'Redirecting to document_converting.html';
             return render(request, 'document_converting.html', context)
         elif status == "done":
             context['report'] = plagscan.document_report(doc_id)
@@ -350,6 +349,7 @@ def document_check(request):
             return render(request, 'document_notid.html', context)
         plagscan = PlagScan()
         status = plagscan.document_check_plagiarism(doc_id)
+
         if status:
             return render(request, 'document_checking.html', context)
 

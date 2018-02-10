@@ -46,9 +46,14 @@
     {% endif %}
     <script type="text/javascript">
         $(document).ready(function(){
+            // Setup modal
             $("#myModal").modal('show');
             $('#submit').click(function() {
-                $("#processModal").modal('show');
+                $("#processModal").modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                // $("#processModal").modal('show');
             })
         });
     </script>

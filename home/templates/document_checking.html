@@ -7,11 +7,16 @@
                 <div class="col-xs-12">
                     <div class="card card-outline-primary">
                         <p>Title: {{ document.document }}</p>
-                        <p>This document is being analyzed at the moment.</p>
-                        <a href="/home/document/?id={{ document.docID }}" class="">Click here to see status.</a>
+                        <p>This document is being analyzed at the moment. Please wait</p>
+                        <input type="hidden" id="doc_id" value="{{ document.docID }}">
+                        <!-- <a href="/home/document/?id={{ document.docID }}" class="">Click here to see status.</a> -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script type="text/javascript">
+        location.href = "/home/document/?id=" + $("#doc_id").val();
+    </script>
 {% endblock %}
