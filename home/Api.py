@@ -5,6 +5,7 @@ client_id = "103369"
 client_secret = "O92K5e5Ar6zWVamBoTjEyeUavrODqvk5"
 mode = 1
 
+
 class PlagScan():
 
     def get_access_token(self):
@@ -20,24 +21,26 @@ class PlagScan():
 
     def document_submit(self, file_location, newdoc):
         access_token = self.get_access_token()
-        url = "https://api.plagscan.com/v3/documents?access_token={}".format(access_token)
+        url = "https://api.plagscan.com/v3/documents?access_token={}".format(
+            access_token)
 
         #headers = {'Content-type': 'application/x-www-form-urlencoded'}
-        data = {'fileUpload':open('media/'+ str(file_location), 'rb')}
-        files = {'fileUpload':open('media/' + str(file_location), 'rb') }
+        data = {'fileUpload': open('media/' + str(file_location), 'rb')}
+        files = {'fileUpload': open('media/' + str(file_location), 'rb')}
         response = requests.post(url, data=data, files=files)
         json = response.json()
         response_data = json['data']
         docID = response_data['docID']
         newdoc.docID = docID
         newdoc.save()
-        #time.sleep(5)
+        # time.sleep(5)
         return docID
 
     def document_check_plagiarism(self, docID):
         access_token = self.get_access_token()
-        url = "https://api.plagscan.com/v3/documents/{}/check?access_token={}".format(docID, access_token)
-        data = {"docID":docID}
+        url = "https://api.plagscan.com/v3/documents/{}/check?access_token={}".format(
+            docID, access_token)
+        data = {"docID": docID}
         response = requests.put(url, data)
         try:
             json = response.json()
@@ -52,7 +55,8 @@ class PlagScan():
 
     def document_analyzed_status(self, docID):
         access_token = self.get_access_token()
-        url = "https://api.plagscan.com/v3/documents/{}?access_token={}".format(docID, access_token)
+        url = "https://api.plagscan.com/v3/documents/{}?access_token={}".format(
+            docID, access_token)
         response = requests.get(url,)
         if ('error' in response.json()):
             return "converting"
@@ -60,21 +64,22 @@ class PlagScan():
         state = response_data['state']
         if state == "3":
             return "done"
-        elif state == "0": 
+        elif state == "0":
             return "not"
         elif state == "1" or state == "2":
             return "checking"
 
     def document_report(self, docID):
         access_token = self.get_access_token()
-        url = "https://api.plagscan.com/v3/documents/{}/retrieve?access_token={}&mode={}".format(docID, access_token, mode)
+        url = "https://api.plagscan.com/v3/documents/{}/retrieve?access_token={}&mode={}".format(
+            docID, access_token, mode)
         response = requests.get(url,)
         response_data = response.json()['data']
         return response_data
 
     def save_from_scanner(self, file_location):
         url = "http://localhost:8080/home/from_scanner_upload/"
-        files = {'myfile': open(file_location,'rb')}
+        files = {'myfile': open(file_location, 'rb')}
         response = requests.post(url, files=files,)
         print (response.json())
         docID = response.json()['docID']

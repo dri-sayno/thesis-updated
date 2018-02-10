@@ -12,13 +12,23 @@
                             {{ form.as_p }}
                             <center>
                                 <input class="user_upload_direct_input file" type="file" name="myfile"><br>
-                                <button type="submit" class="btn btn-outline-primary btn-inst"><p>Submit</p></button>
+                                <button type="submit" id="submit" class="btn btn-outline-primary btn-inst"><p>Submit</p></button>
                             </center>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="processModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <center>Processing... Please wait</center>
+                </div>
+            </div>
+        </div> 
     </div>
     
     {% if messages %}
@@ -37,6 +47,9 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $("#myModal").modal('show');
+            $('#submit').click(function() {
+                $("#processModal").modal('show');
+            })
         });
     </script>
 {% endblock %}
