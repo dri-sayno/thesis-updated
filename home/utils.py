@@ -1,6 +1,6 @@
 import os
 import io
-from PIL import Image 
+from PIL import Image
 import pytesseract
 # from wand.image import Image as wi
 from os import listdir, mkdir
@@ -9,14 +9,18 @@ from django.contrib import messages
 from fpdf import FPDF
 
 # Path for scanned files
-SCANNED_FILES_DIR = "/home/pi/Documents/"
+# SCANNED_FILES_DIR = "/home/pi/Documents/"
 # SCANNED_FILES_DIR = "/Users/Aids/Desktop/Thesis Git 020918/thesis_app/document/"
+# SCANNED_FILES_DIR = "/Users/reymalg.gapido/Desktop/00 Projects/Python/Plagscan/"
+SCANNED_FILES_DIR = dirname(dirname(realpath(__file__))) + "/media/documents/"
+
 
 class PDF(FPDF):
     def footer(self):
         self.set_y(-10)
         self.set_font('Arial', 'I', 8)
         self.cell(0, 10, 'Page' + str(self.page_no()) + '/{nb}', 0, 0, 'C')
+
 
 def create_dir(folder_name):
     content = SCANNED_FILES_DIR + folder_name
@@ -29,6 +33,7 @@ def create_dir(folder_name):
         print('[ERROR] Folder already exists!')
         return False
 
+
 def format_list(input):
     lines = []
     while True:
@@ -37,10 +42,12 @@ def format_list(input):
             lines.append(input)
             break
         lines.append(input[:index])
-        input = input[index+1:]
+        input = input[index + 1:]
     return lines
 
+
 def generate_pdf(contents, doc_title):
+    print("*** [" + dirname(realpath(__file__)) + "]")
     pdf = PDF()
     pdf.alias_nb_pages()
     pdf.add_page()
@@ -48,7 +55,7 @@ def generate_pdf(contents, doc_title):
 
     for content in contents:
         for line in content:
-            pdf.multi_cell(0, 5, line, 0,1)
+            pdf.multi_cell(0, 5, line, 0, 1)
 
     os.chdir(SCANNED_FILES_DIR + doc_title + '/')
     pdf.output(doc_title + ".pdf", 'F')

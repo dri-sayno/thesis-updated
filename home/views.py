@@ -27,7 +27,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
 
 login_validation = True
-doc_type = ""
+doc_type = "T_Written"
 doc_title = ""
 doc_pages = 0
 
@@ -35,7 +35,6 @@ doc_pages = 0
 def index(request):
     global login_validation
     login_validation = False
-    print(login_validation)
     return render(request, 'index.html')
 
 
@@ -73,7 +72,6 @@ def user_home(request):
 
 def user_home_scan(request):
     global login_validation
-    print(login_validation)
     if login_validation:
         return render(request, 'user_home_scan.html')
     else:
@@ -81,10 +79,9 @@ def user_home_scan(request):
 
 
 def doc_info_flatbed(request):
-    print('doc_info_flatbed')
-    print(login_validation)
     if login_validation:
         if request.method == 'GET':
+            print("Rendering doc_info_flatbed.html ...")
             return render(request, 'doc_info_flatbed.html')
         elif request.method == 'POST':
             global doc_type
@@ -94,9 +91,16 @@ def doc_info_flatbed(request):
             doc_title = request.POST.get('doc_title', '')
             doc_pages = request.POST.get('doc_pages', '')
 
+            print("Configuring document details ...")
+            print("Document type: " + doc_type)
+            print("Document title: " + doc_title)
+            print("Document Pages: " + doc_pages)
+
             if create_dir(doc_title):
                 messages.success(
-                    request, 'New folder created! Folder location: ' + SCANNED_FILES_DIR)
+                    request,
+                    'New folder created! Folder location: '
+                    + SCANNED_FILES_DIR)
                 return render(request, 'user_procedure_flatbed.html', {})
             else:
                 messages.error(request, 'Folder already exists!')
@@ -146,47 +150,53 @@ def user_procedure_feeder(request):
 
 
 def user_upload_scan_flatbed(request):
-    print('user_upload_scan_flatbed')
+    global doc_title
+    global doc_pages
+    global doc_type
     if login_validation:
         if request.method == 'GET':
+            print("Rendering user_upload_scan_flatbed.html ...")
             return render(request, 'user_upload_scan_flatbed.html')
         elif request.method == 'POST':
             if 'scan' in request.POST:
-                print('scan')
+                print("Scanning page for flatbed ..." )
                 # TODO: capture 1 image
                 capture_images(
                     (SCANNED_FILES_DIR + doc_title + '/'), 1, 'flatbed')
                 # pdb.set_trace()
-                print('Finish Capturing images')
+                print("Done scannnig image")
                 return render(request, 'user_upload_scan_flatbed.html')
             elif 'submit' in request.POST:
+                print("Submitting scanned files (flatbed)")
                 recognized_text = []
                 if doc_type == 'T_Written':
-                    for f in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
+                    for f in glob.glob(
+                            SCANNED_FILES_DIR + doc_title + '/*.jpg'):
                         unformatted_list = read_typewritten_img(f)
                         recognized_text.append(format_list(unformatted_list))
                 else:
-                    recognized_text = read_handwritten_from_dir(
-                        SCANNED_FILES_DIR + doc_title)
+                    recognized_text = read_handwritten_from_dir(doc_title)
 
-                for file in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
-                    if doc_type == 'T_Written':
-                        unformatted_list = read_typewritten_img(file)
-                        recognized_text.append(format_list(unformatted_list))
-                    else:
-                        pass
-                unformatted_list = read_handwritten_img(file)
-                recognized_text.append(
-                    format_list(unformatted_list))
+                # for file in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
+                #     if doc_type == 'T_Written':
+                #         unformatted_list = read_typewritten_img(file)
+                #         recognized_text.append(format_list(unformatted_list))
+                #     else:
+                #         pass
+                # unformatted_list = read_handwritten_img(file)
+                # recognized_text.append(
+                #     format_list(unformatted_list))
                 generate_pdf(recognized_text, doc_title)
-                print("PDF generated")
-                content = dirname(realpath(__file__)) + "/Documents/" + \
-                    doc_title + "/" + doc_title + ".pdf"
+                print("PDF generated " + doc_title)
+                # generated_filepath = dirname(realpath(__file__)) + "/Documents/" + \
+                #     doc_title + "/" + doc_title + ".pdf"
+
+                generated_filepath = SCANNED_FILES_DIR + doc_title + '/' + doc_title + '.pdf'
                 # content = 'C:\\Users\\Aids\\Desktop\\Thesis Git 020918\\thesis_app\\document\\sample_3\\tapofwar.pdf';
 
-                plagscan = PlagScan()
-                docID = plagscan.save_from_scanner(content)
-                return redirect("/home/document/?id=" + str(docID))
+                print("Path: " + generated_filepath);
+                return redirect(upload_generated_file(generated_filepath, doc_title))
+
                 # if plagscan_upload(content):
                 #     messages.success(request, 'Files upload completed!')
                 #     return render(request, 'doc_result.html')
@@ -203,74 +213,78 @@ def user_upload_scan_feeder(request):
     global doc_type
     if login_validation:
         if request.method == 'GET':
-            print('GET')
-            # capture_images(SCANNED_FILES_DIR + doc_title + '/', doc_pages, 'feeder')
-            # pdb.set_trace()
-            print('Finish Capturing images')
-            messages.success(request, 'null')
+            print("Rendering user_upload_scan_feeder.html ...")
             return render(request, 'user_upload_scan_feeder.html')
         elif request.method == 'POST':
             if 'scan' in request.POST:
-                print('scan')
-                doc_pages = request.POST.get('doc_pages', '')
-                print(doc_pages)
-                capture_images(SCANNED_FILES_DIR + doc_title + '/', doc_pages)
-                messages.success(request, 'null')
-                return render(request, 'user_upload_scan_feeder.html')
+                print("Feeder scanning ....")
+                # doc_pages = request.POST.get('doc_pages', '')
+                # capture_images(SCANNED_FILES_DIR + doc_title + '/', doc_pages)
+                # messages.success(request, 'null')
+                # return render(request, 'user_upload_scan_feeder.html')
             elif 'submit' in request.POST:
-                print('submit')
+                print("Submitting scanned files (feeder)")
                 recognized_text = []
-                doc_title = 'HW_TEST'
                 if doc_type == 'T_Written':
-                    for f in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
+                    for f in glob.glob(
+                            SCANNED_FILES_DIR + doc_title + '/*.jpg'):
                         unformatted_list = read_typewritten_img(f)
                         recognized_text.append(format_list(unformatted_list))
                 else:
-                    recognized_text = read_handwritten_from_dir(
-                        SCANNED_FILES_DIR + doc_title)
-                for file in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
-                    if doc_type == 'T_Written':
-                        unformatted_list = read_typewritten_img(file)
-                        recognized_text.append(format_list(unformatted_list))
-                    else:
-                        unformatted_list = read_handwritten_img(file)
-                        pass
-                unformatted_list = read_handwritten_img(file)
-                recognized_text.append(
-                    format_list(unformatted_list))
+                    recognized_text = read_handwritten_from_dir(doc_title)
+                # for file in glob.glob(SCANNED_FILES_DIR + doc_title + '/*.jpg'):
+                #     if doc_type == 'T_Written':
+                #         unformatted_list = read_typewritten_img(file)
+                #         recognized_text.append(format_list(unformatted_list))
+                #     else:
+                #         # unformatted_list = read_handwritten_img(file)
+                #         pass
+                # unformatted_list = read_handwritten_img(file)
+                # recognized_text.append(
+                #     format_list(unformatted_list))
                 generate_pdf(recognized_text, doc_title)
                 print("PDF generated")
-                content = dirname(realpath(__file__)) + "/Documents/" + \
-                    doc_title + "/" + doc_title + ".pdf"
 
-                if plagscan_upload(content):
-                    messages.success(request, 'Files upload completed!')
-                    return render(request, 'doc_result.html')
-                else:
-                    messages.error(
-                        request, 'Files failed to upload! Try again.')
-                    return render(request, 'user_upload_scan_feeder.html')
+                generated_filepath = SCANNED_FILES_DIR + doc_title + '/' + doc_title + '.pdf'
+                # content = 'C:\\Users\\Aids\\Desktop\\Thesis Git 020918\\thesis_app\\document\\sample_3\\tapofwar.pdf';
+
+                print("Path: " + generated_filepath);
+                return redirect(upload_generated_file(generated_filepath, doc_title))
+                # content = dirname(realpath(__file__)) + "/Documents/" + \
+                #     doc_title + "/" + doc_title + ".pdf"
+
+                # if plagscan_upload(content):
+                #     messages.success(request, 'Files upload completed!')
+                #     return render(request, 'doc_result.html')
+                # else:
+                #     messages.error(
+                #         request, 'Files failed to upload! Try again.')
+                #     return render(request, 'user_upload_scan_feeder.html')
     else:
         return render(request, 'error_page.html')
 
 
 # Uploads generated pdf files for
 # Flatbed and Feeder
-def upload_generated_file(filepath):
+def upload_generated_file(filepath, doc_title):
+    file = open(filepath, 'rb')
     doc = Document(document=filepath)
     doc.save()
 
+    media_doc_path = 'documents/' + doc_title + "/" + doc_title + ".pdf"
+    print("filepath:" + filepath + ", doc_title" + doc_title)
+
     plagscan = PlagScan()
-    docID = plagscan.document_submit(doc.document, doc)
-    return redirect("/home/document/?id=" + str(docID))
+    docID = plagscan.submit_generated_doc(filepath, doc)
+    return "/home/document/?id=" + str(docID)
 
 
 def user_upload_direct(request):
     if login_validation:
         if request.method == 'GET':
-            with open('media/documents/questions.docx', 'rb') as f:  # open the file
-                contents = f.readlines()  # put the lines to a variable (list).
-                print (f.readlines())
+            # with open('media/documents/questions.docx', 'rb') as f:  # open the file
+            #     contents = f.readlines()  # put the lines to a variable (list).
+            #     print (f.readlines())
             return render(request, 'user_upload_direct.html')
         elif request.method == 'POST':
             plagscan = PlagScan()
@@ -283,7 +297,7 @@ def user_upload_direct(request):
             print 'Done submiting!'
 
             print ('Validating form ...')
-            #form = DocumentForm(request.POST, request.FILES)
+            # form = DocumentForm(request.POST, request.FILES)
             '''
 
             fs = FileSystemStorage()

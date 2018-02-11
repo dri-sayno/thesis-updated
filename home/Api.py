@@ -20,6 +20,7 @@ class PlagScan():
         return json['access_token']
 
     def document_submit(self, file_location, newdoc):
+        print('Submitting document of path: ' + file_location)
         access_token = self.get_access_token()
         url = "https://api.plagscan.com/v3/documents?access_token={}".format(
             access_token)
@@ -27,6 +28,24 @@ class PlagScan():
         #headers = {'Content-type': 'application/x-www-form-urlencoded'}
         data = {'fileUpload': open('media/' + str(file_location), 'rb')}
         files = {'fileUpload': open('media/' + str(file_location), 'rb')}
+        response = requests.post(url, data=data, files=files)
+        json = response.json()
+        response_data = json['data']
+        docID = response_data['docID']
+        newdoc.docID = docID
+        newdoc.save()
+        # time.sleep(5)
+        return docID
+
+    def submit_generated_doc(self, file_location, newdoc):
+        print('Submitting document of path: ' + file_location)
+        access_token = self.get_access_token()
+        url = "https://api.plagscan.com/v3/documents?access_token={}".format(
+            access_token)
+
+        #headers = {'Content-type': 'application/x-www-form-urlencoded'}
+        data = {'fileUpload': open(file_location, 'rb')}
+        files = {'fileUpload': open(file_location, 'rb')}
         response = requests.post(url, data=data, files=files)
         json = response.json()
         response_data = json['data']
